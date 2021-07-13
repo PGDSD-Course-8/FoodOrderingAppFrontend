@@ -1,0 +1,58 @@
+@media screen and (min-width: 601px) {
+    .header {
+        display: flex;
+        padding: 10px 15px 10px 15px;
+        justify-content: space-between;
+        background-color: hsl(199deg 20% 18%);
+        color: rgb(217, 233, 248);
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .header {
+        display: flex;
+        flex-direction: column;
+        height: 140px;
+        justify-content: space-between;
+        padding: 10px 15px 10px 15px;
+        background-color: hsl(199deg 20% 18%);
+        color: rgb(217, 233, 248);
+    }
+    .logo .search-bar .userButton {
+        padding: 20px;
+    }
+}
+
+.dispNone {
+    display: None;
+}
+
+.dispBlock {
+    display: block;
+}
+
+.search-bar {
+    width: 350px;
+    display: flex;
+    align-items: center;
+}
+div .search-bar ::after {
+    border-bottom: 2px solid white !important;
+}
+
+.red {
+    display: inline-block;
+    width: 195px;
+    color: red;
+}
+
+.tab-container {
+    height: 100%;
+    padding: 0;
+    text-align: center;
+    overflow-y: auto;
+}
+
+.tabs {
+    margin-bottom: 20px;
+}
