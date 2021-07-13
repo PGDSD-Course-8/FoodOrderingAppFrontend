@@ -23,6 +23,14 @@
     }
 }
 
+.dispNone {
+    display: None;
+}
+
+.dispBlock {
+    display: block;
+}
+
 .search-bar {
     width: 350px;
     display: flex;
@@ -32,9 +40,19 @@ div .search-bar ::after {
     border-bottom: 2px solid white !important;
 }
 
+.red {
+    display: inline-block;
+    width: 195px;
+    color: red;
+}
+
 .tab-container {
     height: 100%;
     padding: 0;
     text-align: center;
     overflow-y: auto;
+}
+
+.tabs {
+    margin-bottom: 20px;
 }
