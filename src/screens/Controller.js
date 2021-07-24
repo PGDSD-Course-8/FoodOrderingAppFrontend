@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import Home from '../screens/home/Home';
+import Details from "./details/Details";
 
 class Controller extends Component {
     constructor() {
@@ -35,9 +36,8 @@ class Controller extends Component {
         return(
             <div>
                 <Router>
-                    <Route exact path='/'>
-                        <Home baseUrl = {this.state.baseUrl} showRestaurants = {showRestaurants} filterRestaurants = {this.filterRestaurants}/>
-                    </Route>
+                        <Route exact path='/' render={(props) => <Home {...props} baseUrl={this.state.baseUrl} showRestaurants = {showRestaurants} filterRestaurants = {this.filterRestaurants}/>} />
+                        <Route path='/restaurant/:id' render={(props) => <Details {...props} baseUrl={this.baseUrl} />} />
                 </Router>
             </div>
         );

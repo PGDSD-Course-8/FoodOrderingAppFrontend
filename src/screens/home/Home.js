@@ -114,6 +114,10 @@ const styles = (theme => ({
 
 
 class Home extends Component {
+  
+  onRestaurantCardClick = (restId) => {
+    this.props.history.push('/restaurant/' + restId);
+  }
 
   render() {
       let showRestaurants = this.props.showRestaurants;
