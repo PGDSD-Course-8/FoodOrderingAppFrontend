@@ -114,17 +114,44 @@ const styles = (theme => ({
 
 
 class Home extends Component {
+  
+  onRestaurantCardClick = (restId) => {
+    this.props.history.push('/restaurant/' + restId);
+  }
+
+  constructor() {
+    super();
+    this.state = {
+        restaurants: [],
+        cards: 0
+    }
+  }
+
+  UNSAFE_componentWillMount() {
+    sessionStorage.removeItem('customer-cart');
+    let _this = this;
+    let dataRestaurants = null;
+    let xhrRestaurants = new XMLHttpRequest();
+    xhrRestaurants.addEventListener('readystatechange', function () {
+        if (this.readyState === 4) {
+            _this.setState({
+                restaurants: JSON.parse(this.responseText).restaurants
+            });
+        }
+    })
+    xhrRestaurants.open('GET', this.props.baseUrl + 'restaurant');
+    xhrRestaurants.send(dataRestaurants);
+  }
 
   render() {
-      let showRestaurants = this.props.showRestaurants;
       const {classes} = this.props;
       return (
           <div>
-              <Header baseUrl = {this.props.baseUrl} filterRestaurants = {this.props.filterRestaurants} />
+              <Header baseUrl = {this.props.baseUrl} searchHandler={this.searchHandler}/>
               <div className="flex-container">
                     <Grid container spacing = {3}>
-                        {showRestaurants.length > 0 ? (
-                                showRestaurants.map(restaurant => (
+                        {this.state.restaurants.length > 0 ? (
+                                this.state.restaurants.map(restaurant => (
                                     <Grid key = {restaurant.id} item xs = {3} className = {classes.gridCard}>
                                         <Card className = {classes.card}>
                                             <CardActionArea className = {classes.cardActionArea}>             
@@ -158,7 +185,7 @@ class Home extends Component {
 
                                                   <span className = "price-for-two">
                                                       <Typography component = "p" variant = "caption" style = {{fontSize: '15px'}}>          
-                                                        <i className="fa fa-inr" aria-hidden="true">
+                                                        <i className = "fa fa-inr" aria-hidden="true">
                                                         </i>
                                                         {restaurant.average_price}
                                                     </Typography>
@@ -172,12 +199,37 @@ class Home extends Component {
                                         </Card>
                                     </Grid>
                                 )) ) : (     
-                              <div> No restaurant with the given name. </div>
+                              <div className = "no-restaurant"> No restaurant with the given name. </div>
                         )}
                     </Grid>
                 </div>
           </div>
       );
   }
+
+  searchHandler = (e) => {
+    let _this = this;
+    let dataRestaurants = null;
+    let xhrRestaurants = new XMLHttpRequest();
+    xhrRestaurants.addEventListener('readystatechange', function () {
+        if (this.readyState === 4) {
+            if (!JSON.parse(this.responseText).restaurants) {
+                _this.setState({ restaurants: null })
+            } else {
+                _this.setState({
+                    restaurants: JSON.parse(this.responseText).restaurants,
+                })
+            }
+        }
+    })
+    if (e.target.value === '') {
+        xhrRestaurants.open('GET', this.props.baseUrl + 'restaurant');
+    } else {
+        xhrRestaurants.open('GET', this.props.baseUrl + 'restaurant/name/' + e.target.value);
+    }
+    xhrRestaurants.send(dataRestaurants);
+  }
+
 }
+
 export default withStyles(styles)(Home);

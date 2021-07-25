@@ -82,7 +82,7 @@ class Header extends Component {
   }
 
   onSearchBarTextChange = (e) => {
-    this.props.filterRestaurants(e.target.value)
+    this.props.searchHandler(e);
   }
 
   openModalHandler = () => {
@@ -123,6 +123,9 @@ class Header extends Component {
 
   signupClickHandler = (e) => {
     this.setState({ registeredContactNo: "dispNone" });
+    this.setState({ inValidEmail: "dispNone" });
+    this.setState({ inValidsignupcontactNo: "dispNone" });
+    this.setState({weakPassword : "dispNone"})
     this.state.firstName.trim() === "" ? this.setState({ firstNameRequired: "dispBlock" })
       : this.setState({ firstNameRequired: "dispNone" });
     this.state.email === "" ? this.setState({ emailRequired: "dispBlock" })
@@ -298,7 +301,7 @@ class Header extends Component {
   passwordChangeHandler = (e) => {
     this.setState({ password: e.target.value });
   };
-
+  
   signupPasswordChangeHandler = (e) => {
     this.setState({ signupPassword: e.target.value });
   };
@@ -323,6 +326,7 @@ class Header extends Component {
                     <SearchIcon />
                   </InputAdornment>}/>
             </div>  
+            
             <div className="userButton">
               {this.state.userLoggedIn ? (
                 <div>
