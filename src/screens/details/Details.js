@@ -188,7 +188,8 @@ class Details extends Component {
         this.setState({ itemQuantityIncreased: false })
     }
 
-    checkoutHandler = () => { //For checkout functionality
+    //For checkout functionality
+    checkoutHandler = () => { 
         if (this.state.totalItems === 0) {
             this.setState({cartEmpty: true});
         } else if (this.state.totalItems > 0 && sessionStorage.getItem('access-token') === null) {
@@ -206,7 +207,6 @@ class Details extends Component {
 
     render() {
         return (
-
             <div><Header baseUrl={this.props.baseUrl}/>
                 {this.state.text}
                 <div className="main-container-body">
@@ -229,7 +229,6 @@ class Details extends Component {
                             <div style={{fontSize: "14px", paddingBottom: "20px"}}>
                                 {
                                     this.state.categories.map((category, index) => (
-
                                         <span
                                             key={category.id + "category"}>{category.category_name}{index < this.state.categories.length - 1 ? ", " : " "} </span>
                                     ))
@@ -321,6 +320,7 @@ class Details extends Component {
                                             </Badge>
                                         </i>My Cart
                                     </div>
+                                    {/* Displays cart items */}
                                     <div className="cart-item-list">
                                         <Grid container>
                                             {
@@ -413,7 +413,6 @@ class Details extends Component {
                         message="Item removed from cart!" />
                     <CustomizedSnackbar open={this.state.itemQuantityIncreased} closeHandler={this.closeHandler}
                         message="Item quantity increased by 1!" />
-
                 </div>
             </div>
         )
