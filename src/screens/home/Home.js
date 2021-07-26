@@ -141,7 +141,39 @@ class Home extends Component {
     })
     xhrRestaurants.open('GET', this.props.baseUrl + 'restaurant');
     xhrRestaurants.send(dataRestaurants);
+    this.setCardNo();
   }
+
+componentDidMount() {
+    window.addEventListener('resize', this.setCardNo);
+}
+
+componentWillUnmount() {
+    window.removeEventListener('resize', this.setCardNo);
+}
+
+//Updating how many cards are visible as per the screen size
+setCardNo = () => {
+    if (window.innerWidth >= 1350) {
+        this.setState({ cards: 5 });
+        return;
+    }
+
+    if (window.innerWidth >= 1100) {
+        this.setState({ cards: 4 });
+        return;
+    }
+
+    if (window.innerWidth >= 900) {
+        this.setState({ cards: 3 });
+        return;
+    }
+    if (window.innerWidth >= 600) {
+        this.setState({ cards: 2 });
+        return;
+    }
+    this.setState({ cards: 1 });
+}
 
   render() {
       const {classes} = this.props;
@@ -149,10 +181,10 @@ class Home extends Component {
           <div>
               <Header baseUrl = {this.props.baseUrl} searchHandler={this.searchHandler}/>
               <div className="flex-container">
-                    <Grid container spacing = {3}>
+                    <Grid container cols={this.state.cards}>
                         {this.state.restaurants.length > 0 ? (
                                 this.state.restaurants.map(restaurant => (
-                                    <Grid key = {restaurant.id} item xs = {3} className = {classes.gridCard}>
+                                    <Grid key = {restaurant.id} item cols={this.state.cards} className = {classes.gridCard}>
                                         <Card className = {classes.card}>
                                             <CardActionArea className = {classes.cardActionArea}>             
                                                 <CardMedia
