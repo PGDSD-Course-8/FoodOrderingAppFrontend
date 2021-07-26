@@ -186,7 +186,7 @@ setCardNo = () => {
                                 this.state.restaurants.map(restaurant => (
                                     <Grid key = {restaurant.id} item cols={this.state.cards} className = {classes.gridCard}>
                                         <Card className = {classes.card}>
-                                            <CardActionArea className = {classes.cardActionArea}>             
+                                            <CardActionArea className = {classes.cardActionArea} onClick={() => this.onRestaurantCardClick(restaurant.id)}>             
                                                 <CardMedia
                                                     image = {restaurant.photo_URL}
                                                     className = {classes.media}                                                   
