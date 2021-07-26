@@ -319,6 +319,7 @@ class Header extends Component {
             <div className="logo">
               <FastfoodIcon fontSize="large" />
             </div>
+            {this.props.showSearchBar === "true" ?
             <div className="search-bar">
               <Input fullWidth placeholder="Search by Restaurant Name" style = {searchTextStyle}
                 onChange={this.onSearchBarTextChange}
@@ -326,6 +327,8 @@ class Header extends Component {
                     <SearchIcon />
                   </InputAdornment>}/>
             </div>  
+            : ""
+            }
             
             <div className="userButton">
               {this.state.userLoggedIn ? (
