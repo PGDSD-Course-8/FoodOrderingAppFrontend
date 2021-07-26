@@ -77,7 +77,6 @@ const theme = createMuiTheme({
     }
 });
 
-//custom style for modal
 const customStyles = {
     content: {
         top: '50%',
@@ -139,6 +138,16 @@ class Header extends Component {
         }
     }
 
+    logoutHander = () => {
+        sessionStorage.removeItem('access-token');
+        sessionStorage.removeItem('uuid');
+        sessionStorage.removeItem('first-name');
+        this.setState({
+            loggedIn: false
+        })
+        this.onMenuClose();
+    }
+
     render() {
         const {classes} = this.props;
         return (
@@ -193,7 +202,7 @@ class Header extends Component {
                                     <MenuItem style={{minHeight: 48}} onClick={this.onMyProfile}><Typography><Link
                                         to={"/profile"} style={{textDecoration: 'none', color: 'black'}}>My
                                         Profile</Link></Typography></MenuItem>
-                                    <MenuItem style={{minHeight: 48}} onClick={this.onLogout}><Link to={"/"} style={{
+                                    <MenuItem style={{minHeight: 48}} onClick={this.logoutHander}><Link to={"/"} style={{
                                         textDecoration: 'none',
                                         color: 'black'
                                     }}><Typography>Logout</Typography></Link></MenuItem>
@@ -221,7 +230,7 @@ class Header extends Component {
                             <InputLabel htmlFor="contactno">Contact No</InputLabel>
                             <Input id="contactno" type="text" value={this.state.loginContactNo}
                                    contactno={this.state.loginContactNo}
-                                   onChange={this.inputLoginContactNoChangeHandler}/>
+                                   onChange={this.onLoginContactNoChange}/>
                             <FormHelperText className={this.state.loginContactNoRequired}>
                                 <span className="red">{this.state.loginContactNoRequiredMessage}</span>
                             </FormHelperText>
@@ -230,7 +239,7 @@ class Header extends Component {
                         <FormControl required className="login-and-signup-forms">
                             <InputLabel htmlFor="password">Password</InputLabel>
                             <Input id="password" type="password" value={this.state.loginPassword}
-                                   password={this.state.loginPassword} onChange={this.inputLoginPasswordChangeHandler}/>
+                                   password={this.state.loginPassword} onChange={this.onLoginPasswordChange}/>
                             <FormHelperText className={this.state.loginPasswordRequired}>
                                 <span className="red">{this.state.loginPasswordRequiredMessage}</span>
                             </FormHelperText>
@@ -375,7 +384,15 @@ class Header extends Component {
         this.setState({value});
     }
 
-    //Checks for login validations - If all fields are there and for incorrect credentials
+
+    onLoginContactNoChange = (e) => {
+        this.setState({loginContactNo: e.target.value});
+    }
+
+    onLoginPasswordChange = (e) => {
+        this.setState({loginPassword: e.target.value});
+    }
+    
     loginClickHandler = () => {
         let contactNoRequired = false;
         if (this.state.loginContactNo === "") {
@@ -389,7 +406,6 @@ class Header extends Component {
                 loginContactNoRequired: "dispNone"
             });
         }
-
         let passwordRequired = false;
         if (this.state.loginPassword === "") {
             this.setState({
@@ -402,38 +418,24 @@ class Header extends Component {
                 loginPasswordRequired: "dispNone"
             });
         }
-
         if ((contactNoRequired && passwordRequired) || contactNoRequired) {
             return;
         }
-
-        // validates the contact number
-        const isvalidContactNo = validator.isMobilePhone(this.state.loginContactNo);
-        if ((contactNoRequired === false && !isvalidContactNo) || this.state.loginContactNo.length !== 10) {
+        const isvalidContactNo = validator.isMobilePhone(this.state.loginContactNo); //If contact number is invalid
+        if ((contactNoRequired === false && !isvalidContactNo) 
+        || this.state.loginContactNo.length !== 10) {
             this.setState({
                 loginContactNoRequiredMessage: "Invalid Contact",
                 loginContactNoRequired: "dispBlock"
             });
             return;
         }
-
         if (passwordRequired) {
             return;
         }
         this.sendLoginDetails();
     }
 
-    // calls when value of the contact no field changes in login form
-    inputLoginContactNoChangeHandler = (e) => {
-        this.setState({loginContactNo: e.target.value});
-    }
-
-    // calls when value of the password field changes in login form
-    inputLoginPasswordChangeHandler = (e) => {
-        this.setState({loginPassword: e.target.value});
-    }
-
-    //closes the login snackbar
     loginSnackBarCloseHandler = (event, reason) => {
         if (reason === 'clickaway') {
             return;
@@ -443,7 +445,6 @@ class Header extends Component {
         });
     }
 
-    // Integrating login functionality with backend
     sendLoginDetails = () => {
         let loginData = null;
         let that = this;
@@ -451,23 +452,20 @@ class Header extends Component {
         xhrLogin.addEventListener("readystatechange", function () {
             if (this.readyState === 4) {
                 let loginResponse = JSON.parse(this.responseText);
-                // displays the login error message
                 if (this.status === 401) {
                     that.setState({
                         loginErroMessage: loginResponse.message,
                         loginErroMessageRequired: "dispBlock"
                     });
-                }
-                // after successful login stores uuid, access-token, first-name inside session storage and displays the login snackbar
-                if (this.status === 200) {
-                    sessionStorage.setItem("uuid", loginResponse.id);
+                }      
+                if (this.status === 200) { //successful attempt
                     sessionStorage.setItem("access-token", xhrLogin.getResponseHeader("access-token"));
+                    sessionStorage.setItem("uuid", loginResponse.id);
                     sessionStorage.setItem("first-name", loginResponse.first_name)
                     that.setState({
                         loggedIn: true,
                         openLoginSnackBar: true
                     });
-                    //closes the modal after successful login
                     that.closeModalHandler();
                 }
             }
@@ -480,10 +478,11 @@ class Header extends Component {
         xhrLogin.send(loginData);
     }
 
-    // signup form validation 
+    // Performs validations for all fields in the sign up modal
     signupClickHandler = () => {
-
-        this.state.signupFirstname === "" ? this.setState({signupFirstnameRequired: "dispBlock"}) : this.setState({signupFirstnameRequired: "dispNone"});
+        this.state.signupFirstname === "" ? 
+        this.setState({signupFirstnameRequired: "dispBlock"}) : 
+        this.setState({signupFirstnameRequired: "dispNone"});
 
         let signupEmailRequired = false;
         if (this.state.signupEmail === "") {
@@ -518,7 +517,6 @@ class Header extends Component {
             this.setState({signupContactNoRequired: "dispNone"});
         }
 
-        // checks the email is valid or not
         const isValidEmail = validator.isEmail(this.state.signupEmail);
         if (signupEmailRequired === false && !isValidEmail) {
             this.setState({
@@ -528,7 +526,7 @@ class Header extends Component {
             return;
         }
 
-        //check the password has  at least one capital letter, one small letter, one number, and one special character
+        //Password should have at least one capital letter, one small letter, one number, and one special character
         const isValidPassword = new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$');
         if (signupPasswordRequired === false && !isValidPassword.test(this.state.signupPassword)) {
             this.setState({
@@ -541,8 +539,6 @@ class Header extends Component {
         if (signupContactNoRequired) {
             return;
         }
-
-        // checks the contact number is valid or not
         const isvalidContactNo = validator.isMobilePhone(this.state.signupContactNo);
         if ((signupContactNoRequired === false && !isvalidContactNo) || this.state.signupContactNo.length !== 10) {
             this.setState({
@@ -551,36 +547,94 @@ class Header extends Component {
             });
             return;
         }
-
         this.sendSignupDetails();
     }
 
-    // calls when value of the firstname field changes in signup form
+        // closes the signup snackbar
+        signupSnackBarCloseHandler = (event, reason) => {
+            if (reason === 'clickaway') {
+                return;
+            }
+            this.setState({
+                openSignupSnackBar: false
+            });
+        }
+
+        sendSignupDetails = () => {
+            let signupData = JSON.stringify({
+                "contact_number": this.state.signupContactNo,
+                "email_address": this.state.signupEmail,
+                "first_name": this.state.signupFirstname,
+                "last_name": this.state.singupLastname,
+                "password": this.state.signupPassword
+            });
+
+            let that = this;
+            let xhrSignup = new XMLHttpRequest();
+            xhrSignup.addEventListener("readystatechange", function () {
+                if (this.readyState === 4) {
+                    let responseText = JSON.parse(this.responseText);
+                    // displays the signup error message
+                    if (this.status === 400) {
+                        that.setState({
+                            signupErrorMessage: responseText.message,
+                            signupErrorMessageRequired: "dispBlock"
+                        });
+                    }
+                    // after successful signup tab changes to login tab inside the modal and displays the signup snackbar
+                    if (this.status === 201) {
+                        that.setState({
+                            value: 0,
+                            openSignupSnackBar: true
+                        });
+                        that.clearSignupForm();
+                    }
+                }
+            });
+            let url = this.props.baseUrl + 'customer/signup'
+            xhrSignup.open("POST", url);
+            xhrSignup.setRequestHeader("Content-Type", "application/json");
+            xhrSignup.setRequestHeader("Cache-Control", "no-cache");
+            xhrSignup.send(signupData);
+        }
+
+        // called when customer clicks on profile icon
+        onProfileIconClick = (e) => {
+            this.setState({'menuState': !this.state.menuState, 'anchorEl': e.currentTarget});
+        }
+
+        // closes the menu
+        onMenuClose = () => {
+            this.setState({'menuState': !this.state.menuState, 'anchorEl': null});
+        }
+
+    onMyProfile = () => {
+        this.setState({
+            loggedIn: true
+        });
+    }
+
+    //These functions are called when the value of some fields is changed during sign up
     inputSignupFirstNameChangeHandler = (e) => {
         this.setState({signupFirstname: e.target.value});
     }
 
-    // calls when value of the lastname field changes in signup form
     inputSignupLastNameChangeHandler = (e) => {
         this.setState({singupLastname: e.target.value});
     }
 
-    // calls when value of the email field changes in signup form
     inputSignupEmailChangeHandler = (e) => {
         this.setState({signupEmail: e.target.value});
     }
 
-    // calls when value of the password field changes in signup form
     inputSignupPasswordChangeHandler = (e) => {
         this.setState({signupPassword: e.target.value});
     }
 
-    // calls when value of the contact no field changes in signup form
     inputSignupContactNoChangeHandler = (e) => {
         this.setState({signupContactNo: e.target.value});
     }
 
-    // clears the signup form after successful signup
     clearSignupForm = () => {
         this.setState({
             signupFirstname: "",
@@ -595,83 +649,6 @@ class Header extends Component {
             signupErrorMessage: "",
             signupErrorMessageRequired: "dispNone",
         });
-    }
-
-    // closes the signup snackbar
-    signupSnackBarCloseHandler = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        this.setState({
-            openSignupSnackBar: false
-        });
-    }
-
-    // Integrating signup functionality with backend
-    sendSignupDetails = () => {
-        let signupData = JSON.stringify({
-            "contact_number": this.state.signupContactNo,
-            "email_address": this.state.signupEmail,
-            "first_name": this.state.signupFirstname,
-            "last_name": this.state.singupLastname,
-            "password": this.state.signupPassword
-        });
-
-        let that = this;
-        let xhrSignup = new XMLHttpRequest();
-        xhrSignup.addEventListener("readystatechange", function () {
-            if (this.readyState === 4) {
-                let responseText = JSON.parse(this.responseText);
-                // displays the signup error message
-                if (this.status === 400) {
-                    that.setState({
-                        signupErrorMessage: responseText.message,
-                        signupErrorMessageRequired: "dispBlock"
-                    });
-                }
-                // after successful signup tab changes to login tab inside the modal and displays the signup snackbar
-                if (this.status === 201) {
-                    that.setState({
-                        value: 0,
-                        openSignupSnackBar: true
-                    });
-                    that.clearSignupForm();
-                }
-            }
-        });
-        let url = this.props.baseUrl + 'customer/signup'
-        xhrSignup.open("POST", url);
-        xhrSignup.setRequestHeader("Content-Type", "application/json");
-        xhrSignup.setRequestHeader("Cache-Control", "no-cache");
-        xhrSignup.send(signupData);
-    }
-
-    // called when customer clicks on profile icon
-    onProfileIconClick = (e) => {
-        this.setState({'menuState': !this.state.menuState, 'anchorEl': e.currentTarget});
-    }
-
-    // closes the menu
-    onMenuClose = () => {
-        this.setState({'menuState': !this.state.menuState, 'anchorEl': null});
-    }
-
-    // redirects to profile page when customer clicks on My Profile inside the menu
-    onMyProfile = () => {
-        this.setState({
-            loggedIn: true
-        });
-    }
-
-    // when customer clicks on logout inside the menu remove's access-token, uuid, first-name from sessionStorage and redirects to home page and closes the menu
-    onLogout = () => {
-        sessionStorage.removeItem('access-token');
-        sessionStorage.removeItem('uuid');
-        sessionStorage.removeItem('first-name');
-        this.setState({
-            loggedIn: false
-        })
-        this.onMenuClose();
     }
 
 }

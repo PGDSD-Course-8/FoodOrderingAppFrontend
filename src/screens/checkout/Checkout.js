@@ -1,11 +1,8 @@
 import React, {Component, Fragment} from 'react';
-//Stylesheet import
 import './Checkout.css'
-
-//Header component Import
 import Header from "../../common/header/Header";
-
-//Material-Ui Imports
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
@@ -27,18 +24,16 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import FormLabel from "@material-ui/core/FormLabel";
 import Radio from "@material-ui/core/Radio";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import OrderItems from "../../common/orderitems/OrderItems";
 import Snackbar from "@material-ui/core/Snackbar";
 import CloseIcon from '@material-ui/icons/Close';
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Grid from "@material-ui/core/Grid";
-//Router Import
 import {Redirect} from 'react-router-dom';
 
 class Checkout extends Component {
+
     constructor() {
         super();
         this.state = {
@@ -72,12 +67,13 @@ class Checkout extends Component {
             this.fetchAddress();
             this.fetchStates();
             this.fetchPayments();
+            //Fetches Addresses, States, and Payment Methods if user is logged in
         }
     }
 
     render() {
         if (this.props.location.state === undefined || sessionStorage.getItem('access-token') === null) {
-            return <Redirect to='/'/>
+            return <Redirect to='/'/> //Redirected to home page if user isn't logged in
         }
         return <Fragment>
             <Header baseUrl={this.props.baseUrl}></Header>
@@ -90,8 +86,10 @@ class Checkout extends Component {
                                 <div>
                                     <AppBar position={"relative"}>
                                         <Tabs value={this.state.activeTabValue} variant='standard'>
+                                            {/* For the addresses already stored by the user */}
                                             <Tab value='existing_address' label='EXISTING ADDRESS'
                                                  onClick={() => this.changeActiveTab('existing_address')}/>
+                                            {/* For the new address that the user wants to add */}
                                             <Tab value='new_address' label='NEW ADDRESS'
                                                  onClick={() => this.changeActiveTab('new_address')}/>
                                         </Tabs>
@@ -104,6 +102,7 @@ class Checkout extends Component {
                                                     component='p'>
                                             There are no saved addresses! You can save an address using the 'New
                                             Address' tab or using your ‘Profile’ menu option.
+                                            {/* If there are no saved addresses. */}
                                         </Typography> :
                                         <GridList style={{flexWrap: 'nowrap'}} cols={3} cellHeight='auto'>
                                             {
@@ -209,6 +208,7 @@ class Checkout extends Component {
                         </Step>
                         <Step key='Payment'>
                             <StepLabel>Payment</StepLabel>
+                            {/* Shows all the modes of payment for the user to select from */}
                             <StepContent>
                                 <div id='payment-modes'>
                                     <FormControl>
@@ -239,14 +239,17 @@ class Checkout extends Component {
                         <CardContent>
                             <Typography variant="h5" component="h2">
                                 Summary
+                                {/* Displays the order summary */}
                             </Typography>
                             <br/>
                             <Typography variant='h6' component='h3' color='textSecondary'
                                         style={{textTransform: "capitalize", marginBottom: 15}}>
                                 {this.props.location.state.restaurantName}
+                                {/* Displays the name of the restaurant the user is ordering from */}
                             </Typography>
                             <OrderItems divider='true' orderitems={this.props.location.state.orderItems}
                                         total={this.props.location.state.total} placeOrder={this.placeOrder}/>
+                                        {/* Displays the total amount and the items ordered  */}
                         </CardContent>
                     </Card>
                 </div>
@@ -257,55 +260,12 @@ class Checkout extends Component {
                           open={this.state.placeOrderMessageOpen}
                           onClose={this.placeOrderMessageClose}
                           autoHideDuration={6000}
-                          action={<Fragment> <IconButton color='inherit'
-                                                         onClick={this.placeOrderMessageClose}><CloseIcon/></IconButton></Fragment>}/>
+                          action={<Fragment> <IconButton 
+                            color='inherit' onClick={this.placeOrderMessageClose}><CloseIcon/></IconButton></Fragment>}/>
             </div>
         </Fragment>
     }
 
-    /**
-     * This function is used for stepper to move ahead based on user actions.
-     */
-    incrementActiveStep = () => {
-        if (this.state.activeStep === 0 && this.state.selectedAddressId === undefined) {
-            //Do nothing as it is mandatory to select an address
-        } else if (this.state.activeStep === 1 && this.state.paymentId === '') {
-            //Do nothing, Because user has to select payment to proceed further.
-        } else {
-
-            let activeState = this.state.activeStep + 1;
-            let changeAddressPayment = 'display-none';
-            if (activeState === 2) {
-                changeAddressPayment = 'display-block';
-            }
-            this.setState({activeStep: activeState, displayChange: changeAddressPayment})
-        }
-    }
-
-    /**
-     * This function is used for stepper to move backwards based on user actions.
-     */
-    decrementActiveStep = () => {
-        let activeState = this.state.activeStep - 1;
-        this.setState({activeStep: activeState})
-    }
-
-    /**
-     * This function is used for stepper reset to first step when user wants to change the order.
-     */
-    resetActiveStep = () => {
-        this.setState({activeStep: 0, displayChange: 'display-none'})
-    }
-    changeActiveTab = (value) => {
-        this.setState({activeTabValue: value})
-        if (value === 'existing_address') {
-            this.fetchAddress();
-        }
-    }
-
-    /**
-     * This function is used when a user clicks on one address tile to select the address.
-     */
     selectAddress = (e) => {
         let elementId = e.target.id;
         if (elementId.startsWith('select-address-icon-')) {
@@ -316,17 +276,56 @@ class Checkout extends Component {
         }
     }
 
-    /**
-     * This function is common for all the input changes of the new address form.
-     */
+    //Stepper Increments
+    incrementActiveStep = () => {
+        if (this.state.activeStep === 0 && this.state.selectedAddressId === undefined) {
+            //Mandatory to select address, so nothing happens if it is undefined
+        }
+        else if (this.state.activeStep === 1 && this.state.paymentId === '') {
+            //Mandatory to do payment, so nothing happens if it is undefined 
+        } 
+        else {
+            let activeState = this.state.activeStep + 1;
+            let changeAddressPayment = 'display-none';
+            if (activeState === 2) {
+                changeAddressPayment = 'display-block';
+            }
+            this.setState({activeStep: activeState, displayChange: changeAddressPayment})
+        }
+    }
+
+    onPaymentSelection = (e) => {
+        this.setState({'paymentId': e.target.value});
+    }
+
+    placeOrderMessageClose = () => {
+        this.setState({placeOrderMessageOpen: false});
+    }
+
+    //Stepper decrements
+    decrementActiveStep = () => {
+        let activeState = this.state.activeStep - 1;
+        this.setState({activeStep: activeState})
+    }
+
+    //Stepper resets on changing order
+    resetActiveStep = () => {
+        this.setState({activeStep: 0, displayChange: 'display-none'})
+    }
+    changeActiveTab = (value) => {
+        this.setState({activeTabValue: value})
+        if (value === 'existing_address') {
+            this.fetchAddress();
+        }
+    }
+
+    //If input fields are changed
     onInputFieldChangeHandler = (e) => {
         let stateKey = e.target.id;
         let stateValue = e.target.value;
-        //Material UI Select doesn't return key
         if (stateKey === undefined) {
             stateKey = 'stateUUID';
         }
-        //Form validation.
         let stateValueRequiredKey = stateKey + 'Required';
         let stateKeyRequiredValue = false;
         if (stateValue === '') {
@@ -343,9 +342,7 @@ class Checkout extends Component {
         });
     }
 
-    /**
-     * This function is used to validate the pincode.
-     */
+    //Validating Pincode
     validatePincode = (pincode) => {
         if (pincode !== undefined && pincode.length !== 6) {
             return false;
@@ -356,23 +353,7 @@ class Checkout extends Component {
         }
     }
 
-    /**
-     * This function is used in step 2 of the stepper when a user selects the payment mode.
-     */
-    onPaymentSelection = (e) => {
-        this.setState({'paymentId': e.target.value});
-    }
-
-    /**
-     * This function closes the snackbar that displays order success or failure message.
-     */
-    placeOrderMessageClose = () => {
-        this.setState({placeOrderMessageOpen: false});
-    }
-
-    /**
-     * This function connects to the API server to fetch the addresses.
-     */
+    //Gets all saved addresses
     fetchAddress = () => {
         let token = sessionStorage.getItem('access-token');
 
@@ -396,57 +377,7 @@ class Checkout extends Component {
         xhr.send();
     }
 
-    /**
-     * This function connects to the API server to fetch the states.
-     */
-    fetchStates = () => {
-
-        let xhr = new XMLHttpRequest();
-
-        let that = this;
-
-        xhr.addEventListener("readystatechange", function () {
-            if (this.readyState === 4) {
-                that.setState({states: JSON.parse(this.responseText).states});
-            }
-        });
-
-        let url = this.props.baseUrl + 'states/';
-
-        xhr.open('GET', url);
-
-        xhr.setRequestHeader("Cache-Control", "no-cache");
-
-        xhr.send();
-    }
-
-    /**
-     * This function connects to the API server to fetch the payments.
-     */
-    fetchPayments = () => {
-
-        let xhr = new XMLHttpRequest();
-
-        let that = this;
-
-        xhr.addEventListener("readystatechange", function () {
-            if (this.readyState === 4) {
-                that.setState({payments: JSON.parse(this.responseText).paymentMethods});
-            }
-        });
-
-        let url = this.props.baseUrl + 'payment';
-
-        xhr.open('GET', url);
-
-        xhr.setRequestHeader("Cache-Control", "no-cache");
-
-        xhr.send();
-    }
-
-    /**
-     * This function connects to the API server to save the address.
-     */
+    //Saves addresses
     saveAddress = () => {
         let tempCityRequired = false;
         let tempPincodeRequired = false;
@@ -491,13 +422,9 @@ class Checkout extends Component {
             pincode: this.state.pincode,
             state_uuid: this.state.stateUUID
         }
-
         let token = sessionStorage.getItem('access-token');
-
         let xhr = new XMLHttpRequest();
-
         let that = this;
-
         xhr.addEventListener("readystatechange", function () {
             if (this.readyState === 4) {
                 that.setState({
@@ -510,21 +437,45 @@ class Checkout extends Component {
                 });
             }
         });
-
         let url = this.props.baseUrl + 'address/';
-
         xhr.open('POST', url);
-
         xhr.setRequestHeader('authorization', 'Bearer ' + token);
         xhr.setRequestHeader("Cache-Control", "no-cache");
         xhr.setRequestHeader('content-type', 'application/json');
-
         xhr.send(JSON.stringify(address));
     }
 
-    /**
-     * This function connects to the API server to place the order.
-     */
+    //Fetches states
+    fetchStates = () => {
+        let xhr = new XMLHttpRequest();
+        let that = this;
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                that.setState({states: JSON.parse(this.responseText).states});
+            }
+        });
+        let url = this.props.baseUrl + 'states/';
+        xhr.open('GET', url);
+        xhr.setRequestHeader("Cache-Control", "no-cache");
+        xhr.send();
+    }
+
+    //Fetches payment methods
+    fetchPayments = () => {
+        let xhr = new XMLHttpRequest();
+        let that = this;
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                that.setState({payments: JSON.parse(this.responseText).paymentMethods});
+            }
+        });
+        let url = this.props.baseUrl + 'payment';
+        xhr.open('GET', url);
+        xhr.setRequestHeader("Cache-Control", "no-cache");
+        xhr.send();
+    }
+
+    //For placing the order
     placeOrder = () => {
         if (this.state.selectedAddressId === '' || this.state.selectedAddressId === undefined || this.state.paymentId === '' || this.state.paymentId === undefined || this.state.displayChange === 'display-none') {
             this.setState({
@@ -547,22 +498,21 @@ class Checkout extends Component {
             bill: bill,
             discount: 0
         }
-
         let token = sessionStorage.getItem('access-token');
-
         let xhr = new XMLHttpRequest();
-
         let that = this;
-
         xhr.addEventListener("readystatechange", function () {
                 if (this.readyState === 4) {
+                    // If successful, it places the order and shows the order id to the user 
                     if (this.status === 201) {
                         let orderId = JSON.parse(this.responseText).id;
                         that.setState({
                             placeOrderMessage: 'Order placed successfully! Your order ID is ' + orderId,
                             placeOrderMessageOpen: true
                         });
-                    } else {
+                    } 
+                    else {
+                        // If unsuccessful, it prompts the user to try to place the order again
                         that.setState({
                             placeOrderMessage: 'Unable to place your order! Please try again!',
                             placeOrderMessageOpen: true
@@ -572,17 +522,12 @@ class Checkout extends Component {
                 }
             }
         );
-
         let url = this.props.baseUrl + 'order';
-
         xhr.open('POST', url);
-
         xhr.setRequestHeader('authorization', 'Bearer ' + token);
         xhr.setRequestHeader("Cache-Control", "no-cache");
         xhr.setRequestHeader('content-type', 'application/json');
-
         xhr.send(JSON.stringify(order));
     }
 }
-
 export default Checkout;
