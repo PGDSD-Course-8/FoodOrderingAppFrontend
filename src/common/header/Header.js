@@ -1,515 +1,688 @@
-import React, { Component } from "react";
-import "./Header.css";
-import SearchIcon from "@material-ui/icons/Search";
-import FastfoodIcon from "@material-ui/icons/Fastfood";
-import Button from "@material-ui/core/Button";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import Input from "@material-ui/core/Input";
+import React, {Component} from 'react';
+
+//importing material-ui styles
+import {withStyles, ThemeProvider, createMuiTheme} from '@material-ui/core/styles';
+
+//importing material-ui components
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import IconButton from '@material-ui/core/IconButton';
+import FastfoodIcon from '@material-ui/icons/Fastfood';
+import Button from '@material-ui/core/Button';
+import SearchIcon from '@material-ui/icons/Search';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 import InputLabel from "@material-ui/core/InputLabel";
+import Input from "@material-ui/core/Input";
 import InputAdornment from "@material-ui/core/InputAdornment";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import AccountCircle from "@material-ui/icons/AccountCircle";
-import { Link } from 'react-router-dom';
-import Modal from "react-modal";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import Snackbar from "@material-ui/core/Snackbar";
-import FormControl from "@material-ui/core/FormControl";
-import Typography from "@material-ui/core/Typography";
-import PropTypes from "prop-types";
-import validator from "validator";
+import Modal from 'react-modal';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Typography from '@material-ui/core/Typography';
+import FormControl from '@material-ui/core/FormControl';
+import PropTypes from 'prop-types';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import validator from 'validator';
+import Snackbar from '@material-ui/core/Snackbar';
+import CloseIcon from '@material-ui/icons/Close';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import {Link} from 'react-router-dom';
 
-const searchTextStyle = {
-  color: "white",
-  height: 40
+//importing the css file of the header
+import './Header.css';
+
+//styles for the header using breakpoints to make the header responsive
+const styles = theme => ({
+    grow: {
+        flexGrow: 1,
+    },
+    appBar: {
+        backgroundColor: '#263238',
+        boxShadow: 'none',
+    },
+    headerTools: {
+        [theme.breakpoints.only('xs')]: {
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+        },
+    },
+    logo: {
+        '&:hover': {
+            backgroundColor: 'transparent !important',
+        },
+        cursor: 'default',
+    },
+    searchBox: {
+        [theme.breakpoints.only('xs')]: {
+            marginBottom: theme.spacing(1.5),
+        },
+    },
+    inputRoot: {
+        color: 'inherit',
+    },
+    inputInput: {
+        width: '30ch',
+    },
+    headerLoginBtn: {
+        [theme.breakpoints.only('xs')]: {
+            marginBottom: theme.spacing(1.5),
+        },
+    },
+    customerProifleBtn: {
+        color: 'white',
+        [theme.breakpoints.only('xs')]: {
+            marginBottom: theme.spacing(1.5),
+        },
+    },
+});
+
+// theme for changing the border bottom color of the searchbox to white when customer clicks on the serach field 
+const theme = createMuiTheme({
+    palette: {
+        primary: {
+            main: '#ffffff',
+        }
+    }
+});
+
+//custom style for modal
+const customStyles = {
+    content: {
+        top: '50%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        marginRight: '-50%',
+        transform: 'translate(-50%, -50%)'
+    }
 };
 
-const modalStyle = {
-  content: {
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    marginRight: "-50%",
-    transform: "translate(-50%, -50%)",
-  },
-};
+// Tab container inside the modal
+const TabContainer = function (props) {
+    return (
+        <Typography component="div" style={{padding: 0, textAlign: 'center'}}>
+            {props.children}
+        </Typography>
+    )
+}
 
-const TabContainer = (props) => {
-  return (
-    <Typography component="div" className="tab-container">
-      {props.children}
-    </Typography>
-  );
-};
-
-TabContainer.prototypes = {
-  children: PropTypes.node.isRequired,
-};
+TabContainer.propTypes = {
+    children: PropTypes.node.isRequired
+}
 
 class Header extends Component {
-  constructor() {
-    super();
-    this.state = {
-      userLoggedIn: sessionStorage.getItem("access-token") == null ? false : true,
-      anchorEl: null,
-      firstName: "",
-      firstNameRequired: "dispNone",
-      lastName: "",
-      value: 0,
-      email: "",
-      emailRequired: "dispNone",
-      inValidEmail: "dispNone",
-      signupPassword: "",
-      signupPasswordRequired: "dispNone",
-      weakPassword: "dispNone",
-      modalIsOpen: false,
-      signupSnackbarIsOpen: false,
-      loginSnackbarIsOpen: false,
-      contactNumber: "",
-      contactNoRequired: "dispNone",
-      invalidContactNo: "dispNone",
-      password: "",
-      passwordRequired: "dispNone",
-      invalidCredentials: "dispNone",
-      signupcontactNo: "",
-      signupcontactNoRequired: "dispNone",
-      inValidsignupcontactNo: "dispNone",
-      registeredContactNo: "dispNone",
-      unregisteredContactNo: "dispNone"
-    };
-  }
 
-  onSearchBarTextChange = (e) => {
-    this.props.searchHandler(e);
-  }
-
-  openModalHandler = () => {
-    this.setState({ modalIsOpen: true });
-  };
-
-  closeModalHandler = () => {
-    this.setState({ firstName: "" });
-    this.setState({ firstNameRequired: "dispNone" });
-    this.setState({ lastName: "" });
-    this.setState({ contactNumber: "" });
-    this.setState({ signupcontactNo: "" });
-    this.setState({ signupcontactNoRequired: "dispNone" });
-    this.setState({ contactNoRequired: "dispNone" });
-    this.setState({ invalidContactNo: "dispNone" });
-    this.setState({ inValidsignupcontactNo: "dispNone" });
-    this.setState({ registeredContactNo: "dispNone" });
-    this.setState({ unregisteredContactNo: "dispNone" });
-    this.setState({ email: "" });
-    this.setState({ emailRequired: "dispNone" });
-    this.setState({ inValidEmail: "dispNone" });
-    this.setState({ password: "" });
-    this.setState({ invalidCredentials: "dispNone" });
-    this.setState({ signupPassword: "" });
-    this.setState({ signupPasswordRequired: "dispNone" });
-    this.setState({ weakPassword: "dispNone" });
-    this.setState({ passwordRequired: "dispNone" });
-    this.setState({ modalIsOpen: false });
-  };
-
-  openMenuHandler = (e) => {
-    this.setState({ anchorEl: e.currentTarget });
-  };
-
-  closeMenuHandler = () => {
-    this.setState({ anchorEl: null });
-  };
-
-  signupClickHandler = (e) => {
-    this.setState({ registeredContactNo: "dispNone" });
-    this.setState({ inValidEmail: "dispNone" });
-    this.setState({ inValidsignupcontactNo: "dispNone" });
-    this.setState({weakPassword : "dispNone"})
-    this.state.firstName.trim() === "" ? this.setState({ firstNameRequired: "dispBlock" })
-      : this.setState({ firstNameRequired: "dispNone" });
-    this.state.email === "" ? this.setState({ emailRequired: "dispBlock" })
-      : this.setState({ emailRequired: "dispNone" });
-    this.state.signupPassword === "" ? this.setState({ signupPasswordRequired: "dispBlock" })
-      : this.setState({ signupPasswordRequired: "dispNone" });
-    this.state.signupcontactNo === "" ? this.setState({ signupcontactNoRequired: "dispBlock" })
-      : this.setState({ signupcontactNoRequired: "dispNone" });
-    
-    if (this.state.email.length > 0) {
-      validator.isEmail(this.state.email)
-        ? this.setState({ inValidEmail: "dispNone" })
-        : this.setState({ inValidEmail: "dispBlock" });
-    }
-    
-    //Checking for password validity
-    if (this.state.signupPassword.length > 0) {
-      let weakPassword = false;
-      if (this.state.signupPassword.length < 8) weakPassword = true;
-      else if (!/[a-z]/.test(this.state.signupPassword)) weakPassword = true;
-      else if (!/[A-Z]/.test(this.state.signupPassword)) weakPassword = true;
-      else if (!/[#@$%&*!^]/.test(this.state.signupPassword))
-        weakPassword = true;
-      else if (!/\d/.test(this.state.signupPassword)) weakPassword = true;
-      weakPassword ? this.setState({ weakPassword: "dispBlock" }) : this.setState({ weakPassword: "dispNone" });
+    constructor() {
+        super();
+        this.state = {
+            modalIsOpen: false,
+            value: 0,
+            loginContactNoRequired: "dispNone",
+            loginContactNo: "",
+            loginContactNoRequiredMessage: "required",
+            loginPasswordRequired: "dispNone",
+            loginPassword: "",
+            loginPasswordRequiredMessage: "required",
+            loggedIn: sessionStorage.getItem("access-token") == null ? false : true,
+            openLoginSnackBar: false,
+            loginErroMessage: "",
+            loginErroMessageRequired: "dispNone",
+            signupFirstname: "",
+            signupFirstnameRequired: "dispNone",
+            singupLastname: "",
+            signupEmail: "",
+            signupEmailRequired: "",
+            signupPassword: "",
+            signupPasswordRequired: "dispNone",
+            signupContactNo: "",
+            signupContactNoRequired: "dispNone",
+            signupEmailRequiredMessage: "required",
+            signupPasswordRequiredMessage: "required",
+            signupContactNoRequiredMessage: "required",
+            openSignupSnackBar: false,
+            signupErrorMessage: "",
+            signupErrorMessageRequired: "dispNone",
+            menuState: false,
+            anchorEl: null,
+        }
     }
 
-   //Checking for sign up contact no. validity
-    if (this.state.signupcontactNo.length > 0) {
-      validator.isNumeric(this.state.signupcontactNo) &&
-      this.state.signupcontactNo.length === 10
-        ? this.setState({ inValidsignupcontactNo: "dispNone" })
-        : this.setState({ inValidsignupcontactNo: "dispBlock" });
-    }
-
-    try {
-      if (
-        this.state.firstName &&
-        this.state.email &&
-        this.state.signupPassword &&
-        this.state.signupcontactNo
-      ) {
-        let data = JSON.stringify({
-          contact_number: this.state.signupcontactNo,
-          email_address: this.state.email,
-          first_name: this.state.firstName,
-          last_name: this.state.lastName,
-          password: this.state.signupPassword,
-        });
-        let xhr = new XMLHttpRequest();
-        let that = this;
-        xhr.addEventListener("readystatechange", function() {
-          if (this.readyState === 4 && this.status === 201) {
-            that.setState({ value: 0 });
-            that.setState({ signupSnackbarIsOpen: true });
-          } else if (this.readyState === 4) {
-            let response = JSON.parse(this.responseText);
-            if (response.code === "SGR-001") {
-              console.log(JSON.parse(this.responseText));
-              that.setState({ registeredContactNo: "dispBlock" });
-            } else {
-              console.log(JSON.parse(this.responseText));
-            }
-          }
-        });
-        xhr.open("POST", this.props.baseUrl + "/customer/signup");
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.setRequestHeader("Cache-Control", "no-cache");
-        xhr.send(data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  loginClickHandler = (e) => {
-    this.setState({ unregisteredContactNo: "dispNone" });
-    this.setState({ invalidCredentials: "dispNone" });
-    this.state.contactNumber === "" ? this.setState({ contactNoRequired: "dispBlock" })
-      : this.setState({ contactNoRequired: "dispNone" });
-    this.state.password === "" ? this.setState({ passwordRequired: "dispBlock" })
-      : this.setState({ passwordRequired: "dispNone" });
-    if (this.state.contactNumber.length > 0) {
-      validator.isNumeric(this.state.contactNumber) &&
-      this.state.contactNumber.length === 10 ? this.setState({ invalidContactNo: "dispNone" })
-        : this.setState({ invalidContactNo: "dispBlock" });
-    }
-    try {
-      if (this.state.contactNumber && this.state.password) {
-        let data = null;
-        let xhr = new XMLHttpRequest();
-        let that = this;
-        xhr.addEventListener("readystatechange", function() {
-          if (this.readyState === 4 && this.status === 200) {
-            sessionStorage.setItem( "access-token", xhr.getResponseHeader("access-token"));
-            let response = JSON.parse(this.responseText);
-            that.setState({ user: response });
-            that.setState({ loginSnackbarIsOpen: true });
-            that.closeModalHandler();
-            that.setState({ userLoggedIn: true });
-          } else if (this.readyState === 4) {
-            let response = JSON.parse(this.responseText);
-            if (that.state.invalidContactNo === "dispNone") {
-              if (response.code === "ATH-001") {
-                console.log(JSON.parse(this.responseText));
-                that.setState({ unregisteredContactNo: "dispBlock" });
-              } else {
-                console.log(JSON.parse(this.responseText));
-                that.setState({ invalidCredentials: "dispBlock" });
-              }
-            }
-          }
-        });
-        xhr.open("POST", this.props.baseUrl + "/customer/login");
-        xhr.setRequestHeader( "authorization",
-          "Basic " + btoa(this.state.contactNumber + ":" + this.state.password)
+    render() {
+        const {classes} = this.props;
+        return (
+            <div>
+                <AppBar position="static" className={classes.appBar}>
+                    {/* Toolbar that contains app logo, searchbox and login button */}
+                    <Toolbar className={classes.headerTools}>
+                        {/* app logo inside iconButton*/}
+                        <IconButton disableRipple={true} className={classes.logo} edge="start" color="inherit"
+                                    aria-label="app logo">
+                            <FastfoodIcon/>
+                        </IconButton>
+                        <div className={classes.grow}/>
+                        {/* searchbox will be displayed only if needed */}
+                        {this.props.showSearchBox ?
+                            <div className={classes.searchBox}>
+                                <ThemeProvider theme={theme}>
+                                    <InputLabel htmlFor="search-box-input"/>
+                                    <Input id="search-box-input"
+                                           startAdornment={
+                                               <InputAdornment position="start">
+                                                   <SearchIcon/>
+                                               </InputAdornment>
+                                           }
+                                           placeholder="Search by Restaurant Name"
+                                           classes={{
+                                               root: classes.inputRoot,
+                                               input: classes.inputInput,
+                                           }}
+                                           onChange={this.props.searchHandler}
+                                    />
+                                </ThemeProvider>
+                            </div>
+                            : null
+                        }
+                        <div className={classes.grow}/>
+                        {/* If customer is not logged in then it displays login button otherwise displays the customer's firstname */}
+                        {!this.state.loggedIn ?
+                            <div className={classes.headerLoginBtn}>
+                                <Button variant="contained" color="default" startIcon={<AccountCircle/>}
+                                        onClick={this.openModalHandler}>Login</Button>
+                            </div>
+                            :
+                            <div className={classes.customerProifleBtn}>
+                                <Button id="customer-profile" startIcon={<AccountCircle/>}
+                                        onClick={this.onProfileIconClick}>{sessionStorage.getItem("first-name")}</Button>
+                                <Menu id="profile-menu" open={this.state.menuState} onClose={this.onMenuClose}
+                                      anchorEl={this.state.anchorEl} getContentAnchorEl={null}
+                                      anchorOrigin={{vertical: "bottom", horizontal: "left"}} keepMounted>
+                                    <MenuItem style={{minHeight: 48}} onClick={this.onMyProfile}><Typography><Link
+                                        to={"/profile"} style={{textDecoration: 'none', color: 'black'}}>My
+                                        Profile</Link></Typography></MenuItem>
+                                    <MenuItem style={{minHeight: 48}} onClick={this.onLogout}><Link to={"/"} style={{
+                                        textDecoration: 'none',
+                                        color: 'black'
+                                    }}><Typography>Logout</Typography></Link></MenuItem>
+                                </Menu>
+                            </div>
+                        }
+                    </Toolbar>
+                </AppBar>
+                {/* displays login modal if customer clicks on the login button, modal contains two tabs one for login and one for signup */}
+                <Modal
+                    ariaHideApp={false}
+                    isOpen={this.state.modalIsOpen}
+                    contentLabel="Login"
+                    onRequestClose={this.closeModalHandler}
+                    style={customStyles}>
+                    <Tabs value={this.state.value} className="tabs" onChange={this.tabChangeHandler}>
+                        <Tab label="Login"/>
+                        <Tab label="Signup"/>
+                    </Tabs>
+                    {/* If value is 0 then displays the first tab of the modal */}
+                    {this.state.value === 0 &&
+                    <TabContainer>
+                        {/* login form with contact no and password input fields */}
+                        <FormControl required className="login-and-signup-forms">
+                            <InputLabel htmlFor="contactno">Contact No</InputLabel>
+                            <Input id="contactno" type="text" value={this.state.loginContactNo}
+                                   contactno={this.state.loginContactNo}
+                                   onChange={this.inputLoginContactNoChangeHandler}/>
+                            <FormHelperText className={this.state.loginContactNoRequired}>
+                                <span className="red">{this.state.loginContactNoRequiredMessage}</span>
+                            </FormHelperText>
+                        </FormControl>
+                        <br/><br/>
+                        <FormControl required className="login-and-signup-forms">
+                            <InputLabel htmlFor="password">Password</InputLabel>
+                            <Input id="password" type="password" value={this.state.loginPassword}
+                                   password={this.state.loginPassword} onChange={this.inputLoginPasswordChangeHandler}/>
+                            <FormHelperText className={this.state.loginPasswordRequired}>
+                                <span className="red">{this.state.loginPasswordRequiredMessage}</span>
+                            </FormHelperText>
+                        </FormControl>
+                        <br/><br/>
+                        <div id="login-error-msg-div" className={this.state.loginErroMessageRequired}><span
+                            id="login-error-msg" className="red">{this.state.loginErroMessage}</span></div>
+                        <br/>
+                        <Button variant="contained" color="primary" onClick={this.loginClickHandler}>LOGIN</Button>
+                    </TabContainer>
+                    }
+                    {this.state.value === 1 &&
+                    <TabContainer>
+                        {/* signup form contains firstname, lastname, email, password and contact no input fields */}
+                        <FormControl required className="login-and-signup-forms">
+                            <InputLabel htmlFor="firstname">First Name</InputLabel>
+                            <Input id="firstname" type="text" value={this.state.signupFirstname}
+                                   signupfirstname={this.state.signupFirstname}
+                                   onChange={this.inputSignupFirstNameChangeHandler}/>
+                            <FormHelperText className={this.state.signupFirstnameRequired}>
+                                <span className="red">required</span>
+                            </FormHelperText>
+                        </FormControl>
+                        <br/><br/>
+                        <FormControl className="login-and-signup-forms">
+                            <InputLabel htmlFor="lastname">Last Name</InputLabel>
+                            <Input id="lastname" type="text" value={this.state.singupLastname}
+                                   signuplastname={this.state.singupLastname}
+                                   onChange={this.inputSignupLastNameChangeHandler}/>
+                        </FormControl>
+                        <br/><br/>
+                        <FormControl required className="login-and-signup-forms">
+                            <InputLabel htmlFor="email">Email</InputLabel>
+                            <Input id="email" type="text" value={this.state.signupEmail}
+                                   signupemail={this.state.signupEmail} onChange={this.inputSignupEmailChangeHandler}/>
+                            <FormHelperText className={this.state.signupEmailRequired}>
+                                <span className="red">{this.state.signupEmailRequiredMessage}</span>
+                            </FormHelperText>
+                        </FormControl>
+                        <br/><br/>
+                        <FormControl required className="login-and-signup-forms">
+                            <InputLabel htmlFor="signupPassword">Password</InputLabel>
+                            <Input id="signupPassword" type="password" value={this.state.signupPassword}
+                                   signuppassword={this.state.signupPassword}
+                                   onChange={this.inputSignupPasswordChangeHandler}/>
+                            <FormHelperText className={this.state.signupPasswordRequired}>
+                                <span className="red">{this.state.signupPasswordRequiredMessage}</span>
+                            </FormHelperText>
+                        </FormControl>
+                        <br/><br/>
+                        <FormControl required className="login-and-signup-forms">
+                            <InputLabel htmlFor="signupContactNo">Contact No.</InputLabel>
+                            <Input id="signupContactNo" type="text" value={this.state.signupContactNo}
+                                   signupcontactno={this.state.signupContactNo}
+                                   onChange={this.inputSignupContactNoChangeHandler}/>
+                            <FormHelperText className={this.state.signupContactNoRequired}>
+                                <span className="red">{this.state.signupContactNoRequiredMessage}</span>
+                            </FormHelperText>
+                        </FormControl>
+                        <br/><br/>
+                        <div id="signup-error-msg-div" className={this.state.signupErrorMessageRequired}><span
+                            id="signup-error-msg" className="red">{this.state.signupErrorMessage}</span></div>
+                        <br/>
+                        <Button variant="contained" color="primary" onClick={this.signupClickHandler}>SIGNUP</Button>
+                    </TabContainer>
+                    }
+                </Modal>
+                {/* login snackbar to display the message if customer login is successful  */}
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={this.state.openLoginSnackBar}
+                    autoHideDuration={10000}
+                    onClose={this.loginSnackBarCloseHandler}
+                    message="Logged in successfully!"
+                    action={
+                        <React.Fragment>
+                            <IconButton size="small" aria-label="close" color="inherit"
+                                        onClick={this.loginSnackBarCloseHandler}>
+                                <CloseIcon fontSize="small"/>
+                            </IconButton>
+                        </React.Fragment>
+                    }
+                />
+                {/* signup snackbar to display the message if customer registered successfully  */}
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={this.state.openSignupSnackBar}
+                    autoHideDuration={10000}
+                    onClose={this.signupSnackBarCloseHandler}
+                    message="Registered successfully! Please login now!"
+                    action={
+                        <React.Fragment>
+                            <IconButton size="small" aria-label="close" color="inherit"
+                                        onClick={this.signupSnackBarCloseHandler}>
+                                <CloseIcon fontSize="small"/>
+                            </IconButton>
+                        </React.Fragment>
+                    }
+                />
+            </div>
         );
-        xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
-        xhr.setRequestHeader("Cache-Control", "no-cache");
-        xhr.send(data);
-      }
-    } catch (error) {
-      console.log(error);
     }
-  };
 
-  logoutClickHandler = () => {
-    this.closeMenuHandler();
-    let data = null;
-    let xhr = new XMLHttpRequest();
-    let that = this;
-    let accessToken = sessionStorage.getItem("access-token");
-    xhr.addEventListener("readystatechange", function() {
-      if (this.readyState === 4 && this.status === 200) {
-        that.setState({ userLoggedIn: false });
-        sessionStorage.removeItem("access-token"); //removes access-token from session storage
-      }
-    });
-    xhr.open("POST", this.props.baseUrl + "/customer/logout");
-    xhr.setRequestHeader("authorization", "Bearer " + accessToken);
-    xhr.setRequestHeader("Cache-Control", "no-cache");
-    xhr.send(data);
-  };
+    // clears all the values and required field validation messages and error messages when modal is opened
+    openModalHandler = () => {
+        this.setState({
+            modalIsOpen: true,
+            value: 0,
+            loginContactNoRequired: "dispNone",
+            loginContactNo: "",
+            loginPasswordRequired: "dispNone",
+            loginPassword: "",
+            loginErroMessage: "",
+            loginErroMessageRequired: "dispNone",
+            signupFirstname: "",
+            signupFirstnameRequired: "dispNone",
+            singupLastname: "",
+            signupEmail: "",
+            signupEmailRequired: "dispNone",
+            signupPassword: "",
+            signupPasswordRequired: "dispNone",
+            signupContactNo: "",
+            signupContactNoRequired: "dispNone",
+            signupErrorMessage: "",
+            signupErrorMessageRequired: "dispNone",
+        });
+    }
 
-  closeSnackbarHandler = (e) => {
-    this.setState({ loginSnackbarIsOpen: false });
-  };
+    // closes the modal
+    closeModalHandler = () => {
+        this.setState({modalIsOpen: false});
+    }
 
-  closeSignupSnackbarHandler = (e) => {
-    this.setState({ signupSnackbarIsOpen: false });
-  };
+    // changes the tabs inside modal
+    tabChangeHandler = (event, value) => {
+        this.setState({value});
+    }
 
-  tabChangeHandler = (e, value) => {
-    this.setState({ value });
-  };
+    /* when customer click's on login button then below function will be called 
+    performs field validation and displays login error message if cutomer tries to login with invalid credentials or 
+    contact no is not registered */
+    loginClickHandler = () => {
 
-  firstNameChangeHandler = (e) => {
-    this.setState({ firstName: e.target.value });
-  };
+        let contactNoRequired = false;
+        if (this.state.loginContactNo === "") {
+            this.setState({
+                loginContactNoRequired: "dispBlock",
+                loginContactNoRequiredMessage: "required"
+            });
+            contactNoRequired = true;
+        } else {
+            this.setState({
+                loginContactNoRequired: "dispNone"
+            });
+        }
 
-  lastNameChangeHandler = (e) => {
-    this.setState({ lastName: e.target.value });
-  };
+        let passwordRequired = false;
+        if (this.state.loginPassword === "") {
+            this.setState({
+                loginPasswordRequired: "dispBlock",
+                loginPasswordRequiredMessage: "required"
+            });
+            passwordRequired = true;
+        } else {
+            this.setState({
+                loginPasswordRequired: "dispNone"
+            });
+        }
 
-  emailChangeHandler = (e) => {
-    this.setState({ email: e.target.value });
-  };
+        if ((contactNoRequired && passwordRequired) || contactNoRequired) {
+            return;
+        }
 
-  contactNumberChangeHandler = (e) => {
-    this.setState({ contactNumber: e.target.value });
-  };
+        // validates the contact number
+        const isvalidContactNo = validator.isMobilePhone(this.state.loginContactNo);
+        if ((contactNoRequired === false && !isvalidContactNo) || this.state.loginContactNo.length !== 10) {
+            this.setState({
+                loginContactNoRequiredMessage: "Invalid Contact",
+                loginContactNoRequired: "dispBlock"
+            });
+            return;
+        }
 
-  passwordChangeHandler = (e) => {
-    this.setState({ password: e.target.value });
-  };
-  
-  signupPasswordChangeHandler = (e) => {
-    this.setState({ signupPassword: e.target.value });
-  };
+        if (passwordRequired) {
+            return;
+        }
+        this.sendLoginDetails();
+    }
 
-  signupcontactNoChangeHandler = (e) => {
-    this.setState({ signupcontactNo: e.target.value });
-  };
+    // calls when value of the contact no field changes in login form
+    inputLoginContactNoChangeHandler = (e) => {
+        this.setState({loginContactNo: e.target.value});
+    }
 
+    // calls when value of the password field changes in login form
+    inputLoginPasswordChangeHandler = (e) => {
+        this.setState({loginPassword: e.target.value});
+    }
 
-  render() {
-    return (
-      <div>
-        <header>
-          <div className="header">
-            <div className="logo">
-              <FastfoodIcon fontSize="large" />
-            </div>
-            {this.props.showSearchBar === "true" ?
-            <div className="search-bar">
-              <Input fullWidth placeholder="Search by Restaurant Name" style = {searchTextStyle}
-                onChange={this.onSearchBarTextChange}
-                startAdornment={ <InputAdornment>
-                    <SearchIcon />
-                  </InputAdornment>}/>
-            </div>  
-            : ""
+    //closes the login snackbar
+    loginSnackBarCloseHandler = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        this.setState({
+            openLoginSnackBar: false
+        });
+    }
+
+    // Integrating login functionality with backend
+    sendLoginDetails = () => {
+        let loginData = null;
+        let that = this;
+        let xhrLogin = new XMLHttpRequest();
+        xhrLogin.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                let loginResponse = JSON.parse(this.responseText);
+                // displays the login error message
+                if (this.status === 401) {
+                    that.setState({
+                        loginErroMessage: loginResponse.message,
+                        loginErroMessageRequired: "dispBlock"
+                    });
+                }
+                // after successful login stores uuid, access-token, first-name inside session storage and displays the login snackbar
+                if (this.status === 200) {
+                    sessionStorage.setItem("uuid", loginResponse.id);
+                    sessionStorage.setItem("access-token", xhrLogin.getResponseHeader("access-token"));
+                    sessionStorage.setItem("first-name", loginResponse.first_name)
+                    that.setState({
+                        loggedIn: true,
+                        openLoginSnackBar: true
+                    });
+                    //closes the modal after successful login
+                    that.closeModalHandler();
+                }
             }
-            
-            <div className="userButton">
-              {this.state.userLoggedIn ? (
-                <div>
-                  {/* If user is logged in then their name will appear in the header */}
-                  <Button onClick = {this.openMenuHandler} variant="contained" color="default" startIcon={<AccountCircle />}>
-                    {this.state.user.first_name}
-                  </Button>
-                </div> 
-                ) : (
-                // If user is logged out the header will have the login button
-                <Button variant="contained" onClick={this.openModalHandler} color="default" startIcon={<AccountCircle />}>
-                  LOGIN
-                </Button>
-              )}
-              <Menu
-                id="profileMenu"
-                anchorEl={this.state.anchorEl}
-                getContentAnchorEl={null}
-                anchorOrigin = {{ vertical: "bottom", horizontal: "center" }}
-                transformOrigin = {{ vertical: "top", horizontal: "center" }}
-                keepMounted
-                open = {Boolean(this.state.anchorEl)}
-                onClose = {this.closeMenuHandler} >
-                <MenuItem component = {Link} to = {"/profile"} onClick = {this.closeMenuHandler}>
-                  My Profile
-                </MenuItem>
-                <MenuItem onClick = {this.logoutClickHandler}>
-                  Logout
-                </MenuItem>
-              </Menu>
-            </div>
-          </div>
-        </header>
-        <Modal
-          ariaHideApp = {false}
-          isOpen = {this.state.modalIsOpen}
-          contentLabel = "Login"
-          onRequestClose = {this.closeModalHandler}
-          style = {modalStyle}>
-          <Tabs
-            className = "tabs"
-            value = {this.state.value}
-            onChange = {this.tabChangeHandler}>
-            <Tab label = "LOGIN" />
-            <Tab label = "SIGNUP" />
-          </Tabs>
-          {this.state.value === 0 && (
-            <TabContainer>
-              <FormControl required>
-                <InputLabel>Contact No.</InputLabel>
-                <Input id="contactNo" onChange={this.contactNumberChangeHandler}
-                  type="text"
-                  value={this.state.contactNumber} />
-                <FormHelperText className={this.state.contactNoRequired}>
-                  <span className="red">required</span>
-                </FormHelperText>
-                <FormHelperText className={this.state.invalidContactNo}>
-                  <span className="red">Invalid Contact</span>
-                </FormHelperText>
-              </FormControl>
-              <br /> <br />
-              <FormControl required>
-                <InputLabel htmlFor="password">Password</InputLabel>
-                <Input id = "password" type="password" value = {this.state.password} onChange = {this.passwordChangeHandler} />
-                <FormHelperText className = {this.state.passwordRequired}>
-                  <span className = "red">required</span>
-                </FormHelperText>
-                <br />
-                <FormHelperText className={this.state.unregisteredContactNo}>
-                  <span className="red">
-                    This contact number has not been registered!
-                  </span>
-                </FormHelperText>
-                <FormHelperText className={this.state.invalidCredentials}>
-                  <span className="red">Invalid Credentials</span>
-                </FormHelperText>
-              </FormControl>
-              <br /> <br />
-              <Button onClick = {this.loginClickHandler} variant="contained" color="primary">
-                LOGIN
-              </Button>
-            </TabContainer>
-          )}
-          {this.state.value === 1 && (
-            <TabContainer>
-              <FormControl required>
-                <InputLabel>First Name</InputLabel>
-                <Input
-                  id = "contactNo"
-                  onChange = {this.firstNameChangeHandler}
-                  type = "text"
-                  value = {this.state.firstName} />
-                <FormHelperText className={this.state.firstNameRequired}>
-                  <span className="red">required</span>
-                </FormHelperText>
-              </FormControl>
-              <br /> <br />
-              <FormControl>
-                <InputLabel>Last Name</InputLabel>
-                <Input id = "lastName" type = "text" value = {this.state.lastName} onChange = {this.lastNameChangeHandler} />
-              </FormControl>
-              <br /> <br />
-              <FormControl required>
-                <InputLabel>Email</InputLabel>
-                <Input
-                  id = "Email"
-                  onChange = {this.emailChangeHandler}
-                  type = "email"
-                  value = {this.state.email} />
-                <FormHelperText className={this.state.emailRequired}>
-                  <span className="red">required</span>
-                </FormHelperText>
-                <FormHelperText className={this.state.inValidEmail}>
-                  <span className="red">Invalid Email</span>
-                </FormHelperText>
-              </FormControl>
-              <br /><br />
-              <FormControl required>
-                <InputLabel htmlFor="signupPassword">Password</InputLabel>
-                <Input
-                  id="signupPassword"
-                  onChange={this.signupPasswordChangeHandler}
-                  type="password"
-                  value={this.state.signupPassword} />
-                <FormHelperText className={this.state.signupPasswordRequired}>
-                  <span className="red">required</span>
-                </FormHelperText>
-                <FormHelperText className={this.state.weakPassword}>
-                  <span className="red">
-                    Password must contain at least one capital letter, one small
-                    letter, one number, and one special character
-                  </span>
-                </FormHelperText>
-              </FormControl>
-              <br />
-              <br />
-              <FormControl required>
-                <InputLabel>Contact No.</InputLabel>
-                <Input
-                  id = "signupcontact"
-                  onChange = {this.signupcontactNoChangeHandler}
-                  type = "text"
-                  value = {this.state.signupcontactNo} />
-                <FormHelperText className = {this.state.signupcontactNoRequired}>
-                  <span className="red">required</span>
-                </FormHelperText>
-                <FormHelperText className={this.state.inValidsignupcontactNo}>
-                  <span className="red">
-                    Contact No. must contain only numbers and must be 10 digits long
-                  </span>
-                </FormHelperText>
-                <br />
-                <FormHelperText className={this.state.registeredContactNo}>
-                  <span className="red">
-                    This contact number is already registered! Try other contact number.
-                  </span>
-                </FormHelperText>
-              </FormControl>
-              <br /><br />
-              <Button variant = "contained" color = "primary" onClick = {this.signupClickHandler}>
-                SIGNUP
-              </Button>
-            </TabContainer>
-          )}
-        </Modal>
+        });
+        let url = this.props.baseUrl + 'customer/login';
+        xhrLogin.open("Post", url);
+        xhrLogin.setRequestHeader("Authorization", "Basic " + window.btoa(this.state.loginContactNo + ":" + this.state.loginPassword));
+        xhrLogin.setRequestHeader("Content-Type", "application/json");
+        xhrLogin.setRequestHeader("Cache-Control", "no-cache");
+        xhrLogin.send(loginData);
+    }
 
-        <Snackbar anchorOrigin = {{vertical: "bottom", horizontal: "left"}}
-          open = {this.state.signupSnackbarIsOpen}
-          autoHideDuration = {2000}
-          onClose = {this.closeSignupSnackbarHandler}
-          message = "Registered successfully! Please login now!"/>
+    // signup form validation 
+    signupClickHandler = () => {
 
-        <Snackbar anchorOrigin = {{vertical: "bottom", horizontal: "left"}}
-          open = {this.state.loginSnackbarIsOpen}
-          autoHideDuration = {2000}
-          onClose = {this.closeSnackbarHandler}
-          message = "Logged in successfully!"/>
+        this.state.signupFirstname === "" ? this.setState({signupFirstnameRequired: "dispBlock"}) : this.setState({signupFirstnameRequired: "dispNone"});
 
-      </div>  
-    );
-  }
+        let signupEmailRequired = false;
+        if (this.state.signupEmail === "") {
+            this.setState({
+                signupEmailRequiredMessage: "required",
+                signupEmailRequired: "dispBlock"
+            });
+            signupEmailRequired = true;
+        } else {
+            this.setState({signupEmailRequired: "dispNone"});
+        }
+
+        let signupPasswordRequired = false;
+        if (this.state.signupPassword === "") {
+            this.setState({
+                signupPasswordRequiredMessage: "required",
+                signupPasswordRequired: "dispBlock"
+            });
+            signupPasswordRequired = true;
+        } else {
+            this.setState({signupPasswordRequired: "dispNone"});
+        }
+
+        let signupContactNoRequired = false;
+        if (this.state.signupContactNo === "") {
+            this.setState({
+                signupContactNoRequiredMessage: "required",
+                signupContactNoRequired: "dispBlock"
+            });
+            signupContactNoRequired = true;
+        } else {
+            this.setState({signupContactNoRequired: "dispNone"});
+        }
+
+        // checks the email is valid or not
+        const isValidEmail = validator.isEmail(this.state.signupEmail);
+        if (signupEmailRequired === false && !isValidEmail) {
+            this.setState({
+                signupEmailRequiredMessage: "Invalid Email",
+                signupEmailRequired: "dispBlock"
+            });
+            return;
+        }
+
+        //check the password has  at least one capital letter, one small letter, one number, and one special character
+        const isValidPassword = new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$');
+        if (signupPasswordRequired === false && !isValidPassword.test(this.state.signupPassword)) {
+            this.setState({
+                signupPasswordRequiredMessage: "Password must contain at least one capital letter, one small letter, one number, and one special character",
+                signupPasswordRequired: "dispBlock"
+            });
+            return;
+        }
+
+        if (signupContactNoRequired) {
+            return;
+        }
+
+        // checks the contact number is valid or not
+        const isvalidContactNo = validator.isMobilePhone(this.state.signupContactNo);
+        if ((signupContactNoRequired === false && !isvalidContactNo) || this.state.signupContactNo.length !== 10) {
+            this.setState({
+                signupContactNoRequiredMessage: "Contact No. must contain only numbers and must be 10 digits long",
+                signupContactNoRequired: "dispBlock"
+            });
+            return;
+        }
+
+        this.sendSignupDetails();
+    }
+
+    // calls when value of the firstname field changes in signup form
+    inputSignupFirstNameChangeHandler = (e) => {
+        this.setState({signupFirstname: e.target.value});
+    }
+
+    // calls when value of the lastname field changes in signup form
+    inputSignupLastNameChangeHandler = (e) => {
+        this.setState({singupLastname: e.target.value});
+    }
+
+    // calls when value of the email field changes in signup form
+    inputSignupEmailChangeHandler = (e) => {
+        this.setState({signupEmail: e.target.value});
+    }
+
+    // calls when value of the password field changes in signup form
+    inputSignupPasswordChangeHandler = (e) => {
+        this.setState({signupPassword: e.target.value});
+    }
+
+    // calls when value of the contact no field changes in signup form
+    inputSignupContactNoChangeHandler = (e) => {
+        this.setState({signupContactNo: e.target.value});
+    }
+
+    // clears the signup form after successful signup
+    clearSignupForm = () => {
+        this.setState({
+            signupFirstname: "",
+            signupFirstnameRequired: "dispNone",
+            singupLastname: "",
+            signupEmail: "",
+            signupEmailRequired: "dispNone",
+            signupPassword: "",
+            signupPasswordRequired: "dispNone",
+            signupContactNo: "",
+            signupContactNoRequired: "dispNone",
+            signupErrorMessage: "",
+            signupErrorMessageRequired: "dispNone",
+        });
+    }
+
+    // closes the signup snackbar
+    signupSnackBarCloseHandler = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        this.setState({
+            openSignupSnackBar: false
+        });
+    }
+
+    // Integrating signup functionality with backend
+    sendSignupDetails = () => {
+        let signupData = JSON.stringify({
+            "contact_number": this.state.signupContactNo,
+            "email_address": this.state.signupEmail,
+            "first_name": this.state.signupFirstname,
+            "last_name": this.state.singupLastname,
+            "password": this.state.signupPassword
+        });
+
+        let that = this;
+        let xhrSignup = new XMLHttpRequest();
+        xhrSignup.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                let responseText = JSON.parse(this.responseText);
+                // displays the signup error message
+                if (this.status === 400) {
+                    that.setState({
+                        signupErrorMessage: responseText.message,
+                        signupErrorMessageRequired: "dispBlock"
+                    });
+                }
+                // after successful signup tab changes to login tab inside the modal and displays the signup snackbar
+                if (this.status === 201) {
+                    that.setState({
+                        value: 0,
+                        openSignupSnackBar: true
+                    });
+                    that.clearSignupForm();
+                }
+            }
+        });
+        let url = this.props.baseUrl + 'customer/signup'
+        xhrSignup.open("POST", url);
+        xhrSignup.setRequestHeader("Content-Type", "application/json");
+        xhrSignup.setRequestHeader("Cache-Control", "no-cache");
+        xhrSignup.send(signupData);
+    }
+
+    // called when customer clicks on profile icon
+    onProfileIconClick = (e) => {
+        this.setState({'menuState': !this.state.menuState, 'anchorEl': e.currentTarget});
+    }
+
+    // closes the menu
+    onMenuClose = () => {
+        this.setState({'menuState': !this.state.menuState, 'anchorEl': null});
+    }
+
+    // redirects to profile page when customer clicks on My Profile inside the menu
+    onMyProfile = () => {
+        this.setState({
+            loggedIn: true
+        });
+    }
+
+    // when customer clicks on logout inside the menu remove's access-token, uuid, first-name from sessionStorage and redirects to home page and closes the menu
+    onLogout = () => {
+        sessionStorage.removeItem('access-token');
+        sessionStorage.removeItem('uuid');
+        sessionStorage.removeItem('first-name');
+        this.setState({
+            loggedIn: false
+        })
+        this.onMenuClose();
+    }
+
 }
-export default Header;
+
+export default withStyles(styles)(Header);
