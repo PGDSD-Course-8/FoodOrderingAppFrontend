@@ -179,7 +179,7 @@ setCardNo = () => {
       const {classes} = this.props;
       return (
           <div>
-              <Header baseUrl = {this.props.baseUrl} searchHandler={this.searchHandler}/>
+              <Header baseUrl = {this.props.baseUrl} searchHandler={this.searchHandler} showSearchBar="true"/>
               <div className="flex-container">
                     <Grid container cols={this.state.cards}>
                         {this.state.restaurants.length > 0 ? (
