@@ -1,9 +1,6 @@
 import React, {Component} from 'react';
-
-//importing material-ui styles
+import './Header.css';
 import {withStyles, ThemeProvider, createMuiTheme} from '@material-ui/core/styles';
-
-//importing material-ui components
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -28,10 +25,6 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import {Link} from 'react-router-dom';
 
-//importing the css file of the header
-import './Header.css';
-
-//styles for the header using breakpoints to make the header responsive
 const styles = theme => ({
     grow: {
         flexGrow: 1,
@@ -76,7 +69,6 @@ const styles = theme => ({
     },
 });
 
-// theme for changing the border bottom color of the searchbox to white when customer clicks on the serach field 
 const theme = createMuiTheme({
     palette: {
         primary: {
@@ -172,6 +164,7 @@ class Header extends Component {
                                                </InputAdornment>
                                            }
                                            placeholder="Search by Restaurant Name"
+                                           //Lets you search for a particular restaurant
                                            classes={{
                                                root: classes.inputRoot,
                                                input: classes.inputInput,
@@ -180,7 +173,8 @@ class Header extends Component {
                                     />
                                 </ThemeProvider>
                             </div>
-                            : null
+                            : 
+                            null
                         }
                         <div className={classes.grow}/>
                         {/* If customer is not logged in then it displays login button otherwise displays the customer's firstname */}
@@ -346,7 +340,7 @@ class Header extends Component {
         );
     }
 
-    // clears all the values and required field validation messages and error messages when modal is opened
+    //When modal is initially opened the validation warnings aren't displayed
     openModalHandler = () => {
         this.setState({
             modalIsOpen: true,
@@ -371,21 +365,18 @@ class Header extends Component {
         });
     }
 
-    // closes the modal
+    // Closing the modal
     closeModalHandler = () => {
         this.setState({modalIsOpen: false});
     }
 
-    // changes the tabs inside modal
+    // To change tabs for the modal
     tabChangeHandler = (event, value) => {
         this.setState({value});
     }
 
-    /* when customer click's on login button then below function will be called 
-    performs field validation and displays login error message if cutomer tries to login with invalid credentials or 
-    contact no is not registered */
+    //Checks for login validations - If all fields are there and for incorrect credentials
     loginClickHandler = () => {
-
         let contactNoRequired = false;
         if (this.state.loginContactNo === "") {
             this.setState({
