@@ -173,6 +173,7 @@ class Header extends Component {
                                                </InputAdornment>
                                            }
                                            placeholder="Search by Restaurant Name"
+                                           //Lets you search for a particular restaurant
                                            classes={{
                                                root: classes.inputRoot,
                                                input: classes.inputInput,
@@ -181,7 +182,8 @@ class Header extends Component {
                                     />
                                 </ThemeProvider>
                             </div>
-                            : null
+                            : 
+                            null
                         }
                         <div className={classes.grow}/>
                         {/* If customer is not logged in then it displays login button otherwise displays the customer's firstname */}
@@ -347,7 +349,7 @@ class Header extends Component {
         );
     }
 
-    // clears all the values and required field validation messages and error messages when modal is opened
+    //When modal is initially opened the validation warnings aren't displayed
     openModalHandler = () => {
         this.setState({
             modalIsOpen: true,
@@ -372,15 +374,16 @@ class Header extends Component {
         });
     }
 
-    // closes the modal
+    // Closing the modal
     closeModalHandler = () => {
         this.setState({modalIsOpen: false});
     }
 
-    // changes the tabs inside modal
+    // To change tabs for the modal
     tabChangeHandler = (event, value) => {
         this.setState({value});
     }
+
 
     onLoginContactNoChange = (e) => {
         this.setState({loginContactNo: e.target.value});
@@ -389,8 +392,7 @@ class Header extends Component {
     onLoginPasswordChange = (e) => {
         this.setState({loginPassword: e.target.value});
     }
-
-    //Checks for validations when user tries to login
+    
     loginClickHandler = () => {
         let contactNoRequired = false;
         if (this.state.loginContactNo === "") {

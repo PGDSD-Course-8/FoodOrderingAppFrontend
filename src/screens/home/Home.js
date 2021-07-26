@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
-
-//importing the header component
+import './Home.css';
 import Header from '../../common/header/Header';
-
-//importing material-ui components
 import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
 import Card from '@material-ui/core/Card';
@@ -12,12 +9,7 @@ import CardContent from '@material-ui/core/CardContent';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-
-//importing font awesome
 import '../../../node_modules/font-awesome/css/font-awesome.min.css';
-
-//importing the css file of the Home page
-import './Home.css';
 
 const styles = theme => ({
     restaurantsCard: {
@@ -49,14 +41,33 @@ class Home extends Component {
         this.mounted = true;
         this.getRestaurants();
         this.noOfColumns();
-        //when the window is resized calls the noOfColumns method
+        //How many columns should be displayed based on screen size
         window.addEventListener('resize', this.noOfColumns);
     }
 
-    //called before render()
     componentWillUnmount() {
         window.removeEventListener('resize', this.noOfColumns);
     }
+
+    //Integrates with the backend and gets all restaurants
+    getRestaurants = () => {
+        let that = this;
+        let restaurantsData = null;
+        let xhrRestaurants = new XMLHttpRequest();
+        xhrRestaurants.onload = this.setState({ loading: true })
+        xhrRestaurants.addEventListener('readystatechange', function () {
+            if (this.readyState === 4) {
+                that.setState({
+                    restaurants: JSON.parse(this.responseText).restaurants,
+                    loading: false
+                });
+            }
+        })
+        let url = this.props.baseUrl + 'restaurant';
+        xhrRestaurants.open("GET", url);
+        xhrRestaurants.send(restaurantsData);
+    }
+
 
     render() {
         const { classes } = this.props;
@@ -64,13 +75,11 @@ class Home extends Component {
             this.mounted === true ?
                 <div>
                     <Header showSearchBox={true} searchHandler={this.searchHandler} baseUrl={this.props.baseUrl} />
-                    {/* if no restaurants found with the entered name displays the No restaurant with the given name. */}
-                    {this.state.restaurants.length === 0 && this.state.loading === false ?
+                    {this.state.restaurants == null && this.state.loading === false ?
                         <Typography variant="h6">No restaurant with the given name.</Typography> :
                         <GridList cols={this.state.cards} cellHeight="auto">
                             {this.state.restaurants.map(restaurant => (
                                 <GridListTile key={'restaurant' + restaurant.id} >
-                                    {/* restaurant details card onclick redirects to restaurant details page*/}
                                     < Card className={classes.restaurantsCard} onClick={() => this.restaurantDetails(restaurant.id)}>
                                         <CardActionArea>
                                             <CardMedia component="img" height={160} image={restaurant.photo_URL} title={restaurant.restaurant_name} />
@@ -111,49 +120,26 @@ class Home extends Component {
         )
     }
 
-    //fetches the restaurants from backend
-    getRestaurants = () => {
-        let that = this;
-        let restaurantsData = null;
-        let xhrRestaurants = new XMLHttpRequest();
-        xhrRestaurants.onload = this.setState({ loading: true })
-        xhrRestaurants.addEventListener('readystatechange', function () {
-            if (this.readyState === 4) {
-                that.setState({
-                    restaurants: JSON.parse(this.responseText).restaurants,
-                    loading: false
-                });
-            }
-        })
-        let url = this.props.baseUrl + 'restaurant';
-        xhrRestaurants.open("GET", url);
-        xhrRestaurants.send(restaurantsData);
-    }
-
-    //method updates the no columns according to the window size
+    //For responsiveness
     noOfColumns = () => {
-
         if (window.innerWidth >= 320 && window.innerWidth <= 600) {
             this.setState({
                 cards: 1,
             });
             return;
         }
-
         if (window.innerWidth >= 601 && window.innerWidth <= 1000) {
             this.setState({
                 cards: 2,
             });
             return;
         }
-
         if (window.innerWidth >= 1001 && window.innerWidth <= 1270) {
             this.setState({
                 cards: 3,
             });
             return;
         }
-
         if (window.innerWidth >= 1271 && window.innerWidth <= 1530) {
             this.setState({
                 cards: 4,
@@ -166,7 +152,7 @@ class Home extends Component {
         }
     }
 
-    // integrating search box with ui
+    //For searching for a particular restaurant
     searchHandler = (event) => {
         let that = this;
         let filteredRestaurants = null;
@@ -193,7 +179,7 @@ class Home extends Component {
         }
     }
 
-    // redirects to restaurant details page with restauranat id
+    // Takes you to the details page for the restaurant from where order can be placed
     restaurantDetails = (restaurantId) => {
         this.props.history.push('/restaurant/' + restaurantId);
     }
